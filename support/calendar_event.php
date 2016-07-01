@@ -1,6 +1,6 @@
 <?php
 	// Calendar event class.  Supports all types of schedules using a cron-like format.
-	// (C) 2011 CubicleSoft.  All Rights Reserved.
+	// (C) 2016 CubicleSoft.  All Rights Reserved.
 
 	class CalendarEvent
 	{
