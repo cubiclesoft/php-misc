@@ -160,7 +160,12 @@
 		// Gets a line of input from the user.  If the user supplies all information via the command-line, this could be entirely automated.
 		public static function GetUserInputWithArgs(&$args, $question, $default, $noparamsoutput = "", $suppressoutput = false)
 		{
-			if (!count($args["params"]) && $noparamsoutput != "")  echo "\n" . $noparamsoutput . "\n";
+			if (!count($args["params"]) && $noparamsoutput != "")
+			{
+				echo "\n" . $noparamsoutput . "\n";
+
+				$suppressoutput = false;
+			}
 
 			if (!$suppressoutput)  echo $question . ($default !== false ? " [" . $default . "]" : "") . ":  ";
 
@@ -189,7 +194,19 @@
 		// Obtains a valid line of input.  If the user supplies all information via the command-line, this could be entirely automated.
 		public static function GetLimitedUserInputWithArgs(&$args, $question, $default, $allowedoptionsprefix, $allowedoptions, $loop = true, $suppressoutput = false)
 		{
-			$noparamsoutput = $allowedoptionsprefix . "\n\n\t" . implode("\n\t", $allowedoptions) . "\n\n";
+			$noparamsoutput = $allowedoptionsprefix . "\n\n";
+			$size = 0;
+			foreach ($allowedoptions as $key => $val)
+			{
+				if ($size < strlen($key))  $size = strlen($key);
+			}
+
+			foreach ($allowedoptions as $key => $val)
+			{
+				$noparamsoutput .= "  " . $key . ":" . str_repeat(" ", $size - strlen($key)) . "  " . $val . "\n";
+			}
+
+			$noparamsoutput .= "\n";
 
 			do
 			{
