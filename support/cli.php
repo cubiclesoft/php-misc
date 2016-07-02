@@ -195,9 +195,9 @@
 			{
 				$result = self::GetUserInputWithArgs($args, $question, $default, $noparamsoutput, $suppressoutput);
 				$result2 = false;
-				foreach ($allowedoptions as $option)
+				foreach ($allowedoptions as $key => $val)
 				{
-					if (!strcasecmp($option, $result))  $result2 = $option;
+					if (!strcasecmp($key, $result) || !strcasecmp($val, $result))  $result2 = $key;
 				}
 				if ($loop && $result2 === false && !$suppressoutput)  echo "Invalid option selected.\n";
 
