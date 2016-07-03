@@ -208,6 +208,12 @@
 
 			$noparamsoutput .= "\n";
 
+			if ($default === false && count($allowedoptions) == 1)
+			{
+				reset($allowedoptions);
+				$default = key($allowedoptions);
+			}
+
 			do
 			{
 				$result = self::GetUserInputWithArgs($args, $question, $default, $noparamsoutput, $suppressoutput);
