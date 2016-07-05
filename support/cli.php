@@ -163,7 +163,7 @@
 			$outputopts = false;
 			if (!count($args["params"]) && $noparamsoutput != "")
 			{
-				echo "\n" . $noparamsoutput . "\n";
+				echo "\n" . rtrim($noparamsoutput) . "\n\n";
 
 				$suppressoutput = false;
 				$outputopts = true;
