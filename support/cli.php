@@ -194,6 +194,7 @@
 				if ($line === false || (is_callable($callback) && !call_user_func_array($callback, array($line, &$callbackopts))))
 				{
 					if ($line === false)  echo "Please enter a value.\n";
+					else  $line = false;
 
 					if (!count($args["params"]) && $noparamsoutput != "")
 					{
