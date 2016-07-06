@@ -158,15 +158,14 @@
 		}
 
 		// Gets a line of input from the user.  If the user supplies all information via the command-line, this could be entirely automated.
-		public static function GetUserInputWithArgs(&$args, $question, $default, $noparamsoutput = "", $suppressoutput = false)
+		public static function GetUserInputWithArgs(&$args, $question, $default, $noparamsoutput = "", $suppressoutput = false, $callback = false, $callbackopts = false)
 		{
-			$outputopts = false;
 			if (!count($args["params"]) && $noparamsoutput != "")
 			{
 				echo "\n" . rtrim($noparamsoutput) . "\n\n";
 
 				$suppressoutput = false;
-				$outputopts = true;
+				$noparamsoutput = "";
 			}
 
 			do
@@ -192,15 +191,15 @@
 					if ($line === "")  $line = $default;
 				}
 
-				if ($line === false)
+				if ($line === false || (is_callable($callback) && !call_user_func_array($callback, array($line, &$callbackopts))))
 				{
-					echo "Please enter a value.\n";
+					if ($line === false)  echo "Please enter a value.\n";
 
-					if (!$outputopts && !count($args["params"]) && $noparamsoutput != "")
+					if (!count($args["params"]) && $noparamsoutput != "")
 					{
 						echo "\n" . $noparamsoutput . "\n";
 
-						$outputopts = true;
+						$noparamsoutput = "";
 					}
 
 					$suppressoutput = false;
