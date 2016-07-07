@@ -298,7 +298,7 @@
 				if ($displayed)  $noparamsoutput = "";
 			} while ($loop && ($result2 === false || is_array($multipleuntil)));
 
-			return ($multiple ? $results : $result2);
+			return (is_array($multipleuntil) ? $results : $result2);
 		}
 
 		// Obtains Yes/No style input.
