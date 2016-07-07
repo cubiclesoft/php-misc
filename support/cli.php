@@ -8,6 +8,7 @@
 		{
 			if (!isset($options["shortmap"]))  $options["shortmap"] = array();
 			if (!isset($options["rules"]))  $options["rules"] = array();
+			if (!isset($options["userinput"]))  $options["userinput"] = false;
 
 			// Clean up shortmap and rules.
 			foreach ($options["shortmap"] as $key => $val)
@@ -55,7 +56,7 @@
 				if ($currarg != "")  $args[] = $currarg;
 			}
 
-			$result = array("success" => true, "file" => array_shift($args), "opts" => array(), "params" => array());
+			$result = array("success" => true, "file" => array_shift($args), "opts" => array(), "params" => array(), "userinput" => array());
 
 			// Look over shortmap to determine if options exist that are one byte (flags) and don't have arguments.
 			$chrs = array();
@@ -154,11 +155,32 @@
 				}
 			}
 
+			// Process user input split.
+			if ($options["userinput"] !== false && is_string($options["userinput"]))
+			{
+				$params = array();
+				foreach ($result["params"] as $arg)
+				{
+					$pos = stripos($arg, $options["userinput"]);
+					if ($pos === false)  $params[] = $arg;
+					else
+					{
+						$name = substr($arg, 0, $pos);
+						$val = substr($arg, $pos + 1);
+
+						if (!isset($result["userinput"][$name]))  $result["userinput"][$name] = array();
+						$result["userinput"][$name][] = $val;
+					}
+				}
+
+				$result["params"] = $params;
+			}
+
 			return $result;
 		}
 
 		// Gets a line of input from the user.  If the user supplies all information via the command-line, this could be entirely automated.
-		public static function GetUserInputWithArgs(&$args, $question, $default, $noparamsoutput = "", $suppressoutput = false, $callback = false, $callbackopts = false)
+		public static function GetUserInputWithArgs(&$args, $prefix, $question, $default, $noparamsoutput = "", $suppressoutput = false, $callback = false, $callbackopts = false)
 		{
 			if (!count($args["params"]) && $noparamsoutput != "")
 			{
@@ -172,7 +194,13 @@
 			{
 				if (!$suppressoutput)  echo $question . ($default !== false ? " [" . $default . "]" : "") . ":  ";
 
-				if (count($args["params"]))
+				if ($prefix !== false && isset($args["userinput"][$prefix]) && count($args["userinput"][$prefix]))
+				{
+					$line = array_shift($args["userinput"][$prefix]);
+					if ($line === "")  $line = $default;
+					if (!$suppressoutput)  echo $line . "\n";
+				}
+				else if (count($args["params"]))
 				{
 					$line = array_shift($args["params"]);
 					if ($line === "")  $line = $default;
@@ -210,8 +238,8 @@
 			return $line;
 		}
 
-		// Obtains a valid line of input.  If the user supplies all information via the command-line, this could be entirely automated.
-		public static function GetLimitedUserInputWithArgs(&$args, $question, $default, $allowedoptionsprefix, $allowedoptions, $loop = true, $suppressoutput = false)
+		// Obtains a valid line of input.
+		public static function GetLimitedUserInputWithArgs(&$args, $prefix, $question, $default, $allowedoptionsprefix, $allowedoptions, $loop = true, $suppressoutput = false, $multipleuntil = false)
 		{
 			$noparamsoutput = $allowedoptionsprefix . "\n\n";
 			$size = 0;
@@ -234,28 +262,46 @@
 				$default = key($allowedoptions);
 			}
 
+			$results = array();
 			do
 			{
-				$result = self::GetUserInputWithArgs($args, $question, $default, $noparamsoutput, $suppressoutput);
+				$displayed = (!count($args["params"]));
+				$result = self::GetUserInputWithArgs($args, $prefix, $question, $default, $noparamsoutput, $suppressoutput);
+				if (is_array($multipleuntil) && $multipleuntil["exit"] === $result)  break;
 				$result2 = false;
 				foreach ($allowedoptions as $key => $val)
 				{
 					if (!strcasecmp($key, $result) || !strcasecmp($val, $result))  $result2 = $key;
 				}
-				if ($loop && $result2 === false && !$suppressoutput)  echo "Invalid option selected.\n";
+				if ($loop)
+				{
+					if ($result2 === false)
+					{
+						echo "Please select an option from the list.\n";
 
-				$noparamsoutput = "";
-			} while ($loop && $result2 === false);
+						$suppressoutput = false;
+					}
+					else if (is_array($multipleuntil))
+					{
+						$results[$result2] = $result2;
 
-			return $result2;
+						$question = $multipleuntil["nextquestion"];
+						$default = $multipleuntil["nextdefault"];
+					}
+				}
+
+				if ($displayed)  $noparamsoutput = "";
+			} while ($loop && ($result2 === false || is_array($multipleuntil)));
+
+			return ($multiple ? $results : $result2);
 		}
 
 		// Obtains Yes/No style input.
-		public static function GetYesNoUserInputWithArgs(&$args, $question, $default, $noparamsoutput = "", $suppressoutput = false)
+		public static function GetYesNoUserInputWithArgs(&$args, $prefix, $question, $default, $noparamsoutput = "", $suppressoutput = false)
 		{
 			$default = (substr(strtoupper(trim($default)), 0, 1) === "Y" ? "Y" : "N");
 
-			$result = self::GetUserInputWithArgs($args, $question, $default, $noparamsoutput, $suppressoutput);
+			$result = self::GetUserInputWithArgs($args, $prefix, $question, $default, $noparamsoutput, $suppressoutput);
 			$result = (substr(strtoupper(trim($result)), 0, 1) === "Y");
 
 			return $result;
