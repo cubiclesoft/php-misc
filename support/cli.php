@@ -179,6 +179,11 @@
 			return $result;
 		}
 
+		public static function CanGetUserInputWithArgs(&$args, $prefix)
+		{
+			return (($prefix !== false && isset($args["userinput"][$prefix]) && count($args["userinput"][$prefix])) || count($args["params"]));
+		}
+
 		// Gets a line of input from the user.  If the user supplies all information via the command-line, this could be entirely automated.
 		public static function GetUserInputWithArgs(&$args, $prefix, $question, $default, $noparamsoutput = "", $suppressoutput = false, $callback = false, $callbackopts = false)
 		{
