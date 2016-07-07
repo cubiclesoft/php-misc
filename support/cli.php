@@ -165,7 +165,7 @@
 					if ($pos === false)  $params[] = $arg;
 					else
 					{
-						$name = substr($arg, 0, $pos);
+						$name = strtolower(substr($arg, 0, $pos));
 						$val = substr($arg, $pos + 1);
 
 						if (!isset($result["userinput"][$name]))  $result["userinput"][$name] = array();
