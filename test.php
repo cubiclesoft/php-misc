@@ -54,12 +54,12 @@
 	var_dump($args);
 	echo "\n\n";
 
-	$line = CLI::GetUserInputWithArgs($args, "Do you have a CPU", "Y");
+	$line = CLI::GetUserInputWithArgs($args, "cpu", "Do you have a CPU", "Y");
 	if ($line === "Y")  CLI::LogMessage("Correct!");
 	else  CLI::DisplayError("Actually, you do!", false, false);
 	echo "\n";
 
-	$line = CLI::GetUserInputWithArgs($args, "Do you have RAM", "Y");
+	$line = CLI::GetUserInputWithArgs($args, "ram", "Do you have RAM", "Y");
 	if ($line === "Y")  CLI::LogMessage("Correct!");
 	else  CLI::DisplayError("Actually, you do!", false, false);
 	echo "\n";
@@ -70,6 +70,10 @@
 	echo "Logged messages after reset:\n";
 	CLI::ResetLogMessages();
 	var_dump(CLI::GetLogMessages());
+	echo "\n\n";
+
+	echo "Hex dump test\n";
+	echo CLI::GetHexDump("Just a quick test.\n");
 	echo "\n\n";
 
 	echo "CalendarEvent test\n";
