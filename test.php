@@ -1,6 +1,6 @@
 <?php
 	// CubicleSoft miscellaneous classes test.
-	// (C) 2016 CubicleSoft.  All Rights Reserved.
+	// (C) 2018 CubicleSoft.  All Rights Reserved.
 
 	if (!isset($_SERVER["argc"]) || !$_SERVER["argc"])
 	{
@@ -115,6 +115,8 @@
 
 	$em->Fire("awesome::test_event", array("I like", array("to" => "eat food.")));
 	echo "\n\n";
+
+	echo "Request class test is in 'test_request.php'.\n";
 
 	echo "Str test\n";
 	$filename = __FILE__;

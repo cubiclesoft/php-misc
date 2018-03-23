@@ -2,5 +2,6 @@
 	"CalendarEvent": "Powerful scheduling class.  Feed in a cron line, get back the next timestamp of when something should trigger.",
 	"CLI": "Static functions in a class to extract command-line options, parse user input on the command-line, and log messages to the console.  Do you really need a separate logging library?  I don't.",
 	"EventManager": "Register to listen for events whenever the application fires them.  Can be the basis of a plugin/module system.",
+	"Request": "Static functions in a class for doing basic, common, but missing request initialization handling.  Common initialization routines for CubicleSoft applications.",
 	"Str": "Static functions in a class for doing basic, common, but missing string manipulation.  Common initialization routines for CubicleSoft applications.  Some minor carryover from extremely old C++ libraries."
 }
