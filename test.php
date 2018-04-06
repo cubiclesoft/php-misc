@@ -15,7 +15,9 @@
 	require_once $rootpath . "/support/cli.php";
 	require_once $rootpath . "/support/calendar_event.php";
 	require_once $rootpath . "/support/event_manager.php";
+	require_once $rootpath . "/support/ipaddr.php";
 	require_once $rootpath . "/support/str_basics.php";
+	require_once $rootpath . "/support/utf8.php";
 
 	// Process the command-line options.
 	$options = array(
@@ -54,15 +56,25 @@
 	var_dump($args);
 	echo "\n\n";
 
+	CLI::StartTimer();
+
 	$line = CLI::GetUserInputWithArgs($args, "cpu", "Do you have a CPU", "Y");
+	usleep(250000);
 	if ($line === "Y")  CLI::LogMessage("Correct!");
 	else  CLI::DisplayError("Actually, you do!", false, false);
 	echo "\n";
 
+	$result = CLI::UpdateTimer();
+	echo "Question + operation took " . $result["diff"] . " seconds.  Total time so far is " . $result["total"] . " seconds.\n\n";
+
 	$line = CLI::GetUserInputWithArgs($args, "ram", "Do you have RAM", "Y");
+	usleep(250000);
 	if ($line === "Y")  CLI::LogMessage("Correct!");
 	else  CLI::DisplayError("Actually, you do!", false, false);
 	echo "\n";
+
+	$result = CLI::UpdateTimer();
+	echo "Question + operation took " . $result["diff"] . " seconds.  Total time so far is " . $result["total"] . " seconds.\n\n";
 
 	echo "Logged messages:\n";
 	var_dump(CLI::GetLogMessages());
@@ -110,13 +122,74 @@
 
 	echo "EventManager test\n";
 	$em = new EventManager();
-	echo "Registered event ID " . $em->Register("awesome::test_event", false, "TestEventCallback") . "\n";
-	echo "Registered event ID " . $em->Register("", false, "GlobalTestEventCallback") . "\n";
+	echo "Registered event ID " . $em->Register("awesome.test_event", "TestEventCallback") . "\n";
+	echo "Registered event ID " . $em->Register("", "GlobalTestEventCallback") . "\n";
 
-	$em->Fire("awesome::test_event", array("I like", array("to" => "eat food.")));
+	$em->Fire("awesome.test_event", array("I like", array("to" => "eat food.")));
 	echo "\n\n";
 
-	echo "Request class test is in 'test_request.php'.\n";
+	echo "IPAddr test\n";
+	$ipaddr = IPAddr::NormalizeIP("127.0.0.1");
+	var_dump($ipaddr);
+	echo "\n";
+
+	$preferipv6 = false;
+	$remotehost = "localhost";
+
+	if (IPAddr::IsHostname($remotehost))
+	{
+		$info = ($preferipv6 ? @dns_get_record($remotehost . ".", DNS_AAAA) : false);
+		if ($info === false || !count($info))  $info = @dns_get_record($remotehost . ".", DNS_A);
+		if ($info === false || !count($info))  $info = @dns_get_record($remotehost . ".", DNS_ANY);
+
+		$valid = false;
+
+		if ($info !== false)
+		{
+			foreach ($info as $entry)
+			{
+				if ($entry["type"] === "A" || ($preferipv6 && $entry["type"] === "AAAA"))
+				{
+					$remoteip = IPAddr::NormalizeIP($info[0]["ip"]);
+
+					$valid = true;
+
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		$remoteip = IPAddr::NormalizeIP($remotehost);
+
+		$valid = true;
+	}
+
+	if (!$valid)  echo "Invalid remote host specified.  Try again.";
+	else  var_dump($remoteip);
+	echo "\n";
+
+	$pattern = "64.18.0-15.0-255";
+	var_dump(IPAddr::IsMatch($pattern, "127.0.0.1"));
+	var_dump(IPAddr::IsMatch($pattern, "64.18.5.2"));
+	var_dump(IPAddr::IsMatch($pattern, "::ffff:4012:502"));  // "64.18.5.2" in IPv6 notation.
+	echo "\n\n";
+
+	// The last two bytes are invalid so the first couple of var_dump()'s will output strange results.
+	echo "UTF8 test\n";
+	$str = "So good \xF0\x9F\x98\x82\xFF\x80";
+	var_dump($str);
+	var_dump(htmlspecialchars($str));
+	echo "\n";
+
+	if (!UTF8::IsValid($str))  $str = UTF8::MakeValid($str);
+	var_dump($str);
+	var_dump(htmlspecialchars($str));
+	var_dump(UTF8::ConvertToHTML($str));
+	echo "\n\n";
+
+	echo "Request class test is in 'test_request.php'.\n\n";
 
 	echo "Str test\n";
 	$filename = __FILE__;
