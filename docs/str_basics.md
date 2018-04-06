@@ -106,7 +106,7 @@ Parameters:
 
 Returns:  A string containing a safe filename prefix.
 
-This function allows the characters A-Z, a-z, 0-9, '_' (underscore), '.' (period), and '-' (hyphen) through.  All other characters are converted to hyphens.  Multiple hyphens in a row are converted to one hyphen.  So a filename like 'index@$%*&^$+hacked?12.php' becomes 'index-hacked-12.php'.
+This static function allows the characters A-Z, a-z, 0-9, '_' (underscore), '.' (period), and '-' (hyphen) through.  All other characters are converted to hyphens.  Multiple hyphens in a row are converted to one hyphen.  So a filename like `index@$%*&^$+hacked?12.php` becomes `index-hacked-12.php`.
 
 Note that this function still allows file extensions through.  You should always add your own file extension when calling this function.
 
