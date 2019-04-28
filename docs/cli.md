@@ -21,7 +21,6 @@ This static function parses the input arguments using the specified rules.  The 
 
 * shortmap - An array containing key-value pairs that map between a short value (e.g. 'v') and maps it to a rule in the 'rules' map (e.g. 'verbose') (Default is array()).
 * rules - An array containing key-value pairs that map a rule name to an array of "arg" and "multiple" boolean options (Default is array()).
-* userinput - A boolean of false or a string that specifies the byte (or bytes) to split parameters on (e.g. "=") for later use with the question-answer functions (Default is false).
 * allow_opts_after_param - A boolean that specifies whether or not to continue to process options from "rules" after the first parameter is found (Default is true).
 
 Example usage:
@@ -54,7 +53,7 @@ Example usage:
 			"suppressoutput" => array("arg" => false),
 			"help" => array("arg" => false)
 		),
-		"userinput" => "="
+		"allow_opts_after_param" => false
 	);
 	$args = CLI::ParseCommandLine($options);
 
@@ -72,15 +71,64 @@ Example usage:
 		echo "\n";
 		echo "Examples:\n";
 		echo "\tphp " . $args["file"] . "\n";
-		echo "\tphp " . $args["file"] . " create name=test\n";
+		echo "\tphp " . $args["file"] . " create -name test\n";
 		echo "\tphp " . $args["file"] . " -s list\n";
 
 		exit();
 	}
 
 	$suppressoutput = (isset($args["opts"]["suppressoutput"]) && $args["opts"]["suppressoutput"]);
+
+	// Get the command.
+	$cmds = array(
+		"list" => "List domains",
+		"create" => "Create domain",
+		"delete" => "Delete domain"
+	);
+
+	$cmd = CLI::GetLimitedUserInputWithArgs($args, false, "Command", false, "Available commands:", $cmds, true, $suppressoutput);
+
+	function DisplayResult($result)
+	{
+		echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
+
+		exit();
+	}
+
+	if ($cmd === "list")
+	{
+		// ...
+	}
+	else if ($cmd === "create")
+	{
+		// Process the parameters.
+		$options = array(
+			"shortmap" => array(
+				"?" => "help"
+			),
+			"rules" => array(
+				"domain" => array("arg" => true, "multiple" => true),
+				"ipaddr" => array("arg" => true, "multiple" => true),
+				"help" => array("arg" => false)
+			)
+		);
+		$args = CLI::ParseCommandLine($options, array_merge(array(""), $args["params"]));
+
+		if (isset($args["opts"]["help"]))  DisplayResult(array("success" => true, "options" => array_keys($options["rules"])));
+
+		$domain = GetDomainName();
+		$ipaddr = CLI::GetUserInputWithArgs($args, "ipaddr", "Your IP address", false, "To quickly find out what your IP address is, go to:  https://www.google.com/search?q=what's+my+ip");
+
+		// ...
+	}
+	else if ($cmd === "delete")
+	{
+		// ...
+	}
 ?>
 ```
+
+NOTE:  There used to be an option called "userinput" to enable question/answer CLI tools to be built and has been removed.  A better approach is demonstrated in the above example where options are processed twice with parameters separating the two sets of options and `allow_opts_after_param` is set to false in the first call to stop processing options at the first parameter.  The newer approach eliminates some bugs and also allows for help to be output containing the keys that the later options look for without having to read source code.
 
 CLI::CanGetUserInputWithArgs(&$args, $prefix)
 ---------------------------------------------
@@ -89,7 +137,7 @@ Access:  public static
 
 Parameters:
 
-* $args - An array of arguments from an earlier ParseCommandLine() call with a "userinput" rule.
+* $args - An array of arguments from an earlier ParseCommandLine() call.
 * $prefix - A boolean of false or a string containing the key to look up in user input.
 
 Returns:  A boolean that indicates whether or not there is user input available.
@@ -136,7 +184,7 @@ Access:  public static
 
 Parameters:
 
-* $args - An array of arguments from an earlier ParseCommandLine() call with a "userinput" rule.
+* $args - An array of arguments from an earlier ParseCommandLine() call.
 * $prefix - A boolean of false or a string containing the key to look up in user input.
 * $question - A string containing the question to ask the user if user input is not available.
 * $default - A boolean of false or a string containing a default value.
@@ -166,7 +214,7 @@ Access:  public static
 
 Parameters:
 
-* $args - An array of arguments from an earlier ParseCommandLine() call with a "userinput" rule.
+* $args - An array of arguments from an earlier ParseCommandLine() call.
 * $prefix - A boolean of false or a string containing the key to look up in user input.
 * $question - A string containing the question to ask the user if user input is not available.
 * $default - A boolean of false or a string containing a default value.
@@ -205,7 +253,7 @@ Access:  public static
 
 Parameters:
 
-* $args - An array of arguments from an earlier ParseCommandLine() call with a "userinput" rule.
+* $args - An array of arguments from an earlier ParseCommandLine() call.
 * $prefix - A boolean of false or a string containing the key to look up in user input.
 * $question - A string containing the question to ask the user if user input is not available.
 * $default - A boolean of false or a string containing a default value.
