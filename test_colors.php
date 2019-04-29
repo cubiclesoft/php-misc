@@ -77,9 +77,11 @@
 
 		if (isset($args["opts"]["sampletext"]))
 		{
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]));
-
-			echo "\n\n" . $sampletext;
+			$colorstr = ColorTools::ConvertToHex($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]);
+			$hsb = ColorTools::ConvertRGBToHSB($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "\n\nColor " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
+			echo $sampletext;
 		}
 
 		XTerm::SetForegroundColor(false);
@@ -109,15 +111,70 @@
 		{
 			$x2 = ColorTools::FindNearestPaletteColorIndex($palette2, $fgrgb["r"], $fgrgb["g"], $fgrgb["b"]);
 
-			XTerm::SetForegroundColor($x2);
-
-			echo "\n\n" . $sampletext;
+			$colorstr = ColorTools::ConvertToHex($palette2[$x2][0], $palette2[$x2][1], $palette2[$x2][2]);
+			$hsb = ColorTools::ConvertRGBToHSB($palette2[$x2][0], $palette2[$x2][1], $palette2[$x2][2]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "\n\nColor " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
+			echo $sampletext;
 		}
 
 		XTerm::SetForegroundColor(false);
 		XTerm::SetBackgroundColor(false);
 
 		echo "\n\n";
+
+		// Display palette entries 0-15 specially.
+		echo "ANSI named colors (palette indexes 0-15):\n";
+
+		XTerm::SetBackgroundColor($bgstr);
+
+		// Source:  https://en.wikipedia.org/wiki/ANSI_escape_code
+		$palettemap = array(
+			array("name" => "Black         ", "xterm" => array(0, 0, 0)),
+			array("name" => "Red           ", "xterm" => array(205, 0, 0)),
+			array("name" => "Green         ", "xterm" => array(0, 205, 0)),
+			array("name" => "Yellow        ", "xterm" => array(205, 205, 0)),
+			array("name" => "Blue          ", "xterm" => array(0, 0, 238)),
+			array("name" => "Magenta       ", "xterm" => array(205, 0, 205)),
+			array("name" => "Cyan          ", "xterm" => array(0, 205, 205)),
+			array("name" => "White         ", "xterm" => array(229, 229, 229)),
+			array("name" => "Bright Black  ", "xterm" => array(127, 127, 127)),
+			array("name" => "Bright Red    ", "xterm" => array(255, 0, 0)),
+			array("name" => "Bright Green  ", "xterm" => array(0, 255, 0)),
+			array("name" => "Bright Yellow ", "xterm" => array(255, 255, 0)),
+			array("name" => "Bright Blue   ", "xterm" => array(92, 92, 255)),
+			array("name" => "Bright Magenta", "xterm" => array(255, 0, 255)),
+			array("name" => "Bright Cyan   ", "xterm" => array(0, 255, 255)),
+			array("name" => "Bright White  ", "xterm" => array(255, 255, 255))
+		);
+
+		$vscolor = ColorTools::FindNearestReadableTextColor(255, 255, 255, $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
+		$vscolor = ColorTools::ConvertToHex($vscolor[0], $vscolor[1], $vscolor[2]);
+
+		foreach ($palettemap as $x => $info)
+		{
+			XTerm::SetForegroundColor($vscolor);
+			echo "[" . $x . "] " . ($x < 10 ? " " : "") . $info["name"] . "    ";
+
+			$tinfo = $info["xterm"];
+
+			$colorstr = ColorTools::ConvertToHex($tinfo[0], $tinfo[1], $tinfo[2]);
+			$hsb = ColorTools::ConvertRGBToHSB($tinfo[0], $tinfo[1], $tinfo[2]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"];
+
+			XTerm::SetForegroundColor($vscolor);
+			echo " => ";
+
+			$result = ColorTools::FindNearestReadableTextColor($tinfo[0], $tinfo[1], $tinfo[2], $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
+			$colorstr = ColorTools::ConvertToHex($result[0], $result[1], $result[2]);
+			$hsb = ColorTools::ConvertRGBToHSB($result[0], $result[1], $result[2]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
+		}
+
+		XTerm::SetForegroundColor(false);
+		XTerm::SetBackgroundColor(false);
 	}
 
 	if (isset($args["opts"]["truecolor"]))
@@ -133,18 +190,20 @@
 			$fg = array_values(ColorTools::ConvertHSBToRGB($h, 100, 100));
 
 			// On the left is the original hue at 100% brightness and saturation.
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]));
+			$colorstr = ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]);
 			$hsb = ColorTools::ConvertRGBToHSB($fg[0], $fg[1], $fg[2]);
-			echo "Color " . ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]) . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"];
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"];
 
 			XTerm::SetForegroundColor($vscolor);
 			echo "  =>  ";
 
 			// On the right is the nearest match to the original color for the input background.
 			$result = ColorTools::FindNearestReadableTextColor($fg[0], $fg[1], $fg[2], $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($result[0], $result[1], $result[2]));
+			$colorstr = ColorTools::ConvertToHex($result[0], $result[1], $result[2]);
 			$hsb = ColorTools::ConvertRGBToHSB($result[0], $result[1], $result[2]);
-			echo "Color " . ColorTools::ConvertToHex($result[0], $result[1], $result[2]) . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
 		}
 
 		// Repeat the process but display grayscale in 17 different levels of brightness.
@@ -154,29 +213,36 @@
 
 		foreach ($palette as $fg)
 		{
-			$result = ColorTools::FindNearestReadableTextColor($fg[0], $fg[1], $fg[2], $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
-
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]));
+			$colorstr = ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]);
 			$hsb = ColorTools::ConvertRGBToHSB($fg[0], $fg[1], $fg[2]);
-			echo "Color " . ColorTools::ConvertToHex($fg[0], $fg[1], $fg[2]) . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"];
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"];
 
 			XTerm::SetForegroundColor($vscolor);
 			echo "  =>  ";
 
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($result[0], $result[1], $result[2]));
+			$result = ColorTools::FindNearestReadableTextColor($fg[0], $fg[1], $fg[2], $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
+			$colorstr = ColorTools::ConvertToHex($result[0], $result[1], $result[2]);
 			$hsb = ColorTools::ConvertRGBToHSB($result[0], $result[1], $result[2]);
-			echo "Color " . ColorTools::ConvertToHex($result[0], $result[1], $result[2]) . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
 		}
 
 		if (isset($args["opts"]["sampletext"]))
 		{
 			echo "\n";
 
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]));
+			$colorstr = ColorTools::ConvertToHex($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]);
+			$hsb = ColorTools::ConvertRGBToHSB($fgrgb["r"], $fgrgb["g"], $fgrgb["b"]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
 			echo $sampletext . "\n\n";
 
 			$result = ColorTools::FindNearestReadableTextColor($fgrgb["r"], $fgrgb["g"], $fgrgb["b"], $bgrgb["r"], $bgrgb["g"], $bgrgb["b"]);
-			XTerm::SetForegroundColor(ColorTools::ConvertToHex($result[0], $result[1], $result[2]));
+			$colorstr = ColorTools::ConvertToHex($result[0], $result[1], $result[2]);
+			$hsb = ColorTools::ConvertRGBToHSB($result[0], $result[1], $result[2]);
+			XTerm::SetForegroundColor($colorstr);
+			echo "Color " . $colorstr . " - H: " . (int)$hsb["h"] . ", S: " . (int)$hsb["s"] . ", B: " . (int)$hsb["b"] . "\n";
 			echo $sampletext . "\n";
 		}
 
