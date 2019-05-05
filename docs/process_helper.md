@@ -120,6 +120,34 @@ Returns:  An array of environment key-value pairs.
 
 This static function retrieves the current running script environment but removes specific entries that PHP CLI adds on startup.  Useful for constructing an environment for `StartProcess()`.
 
+ProcessHelper::StartTCPServer()
+-------------------------------
+
+Access:  public static
+
+Parameters:  None.
+
+Returns:  A standard array of information.
+
+This static function starts a localhost only TCP/IP server on a random port and returns a handle to it and some information along with a security token.  Subsequent calls return the already started server information and a new security token.  Used primarily by `StartProcess()` on Windows.
+
+ProcessHelper::GetTCPPipes(&$pipes, $servertoken, $proc, $waitfor = 0.5, $checkcallback = false)
+------------------------------------------------------------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $pipes - An array of pipe numbers to fill in with TCP/IP sockets.
+* $servertoken - A string containing a security token from a `StartTCPServer()` call.
+* $proc - A resource to a process handle or a boolean of false.
+* $waitfor - A double containing the amount of time to wait, in seconds, before checking for process termination (Default is 0.5).
+* $checkcallback - A valid callback function for a timed check callback (Default is false).  The callback function must accept one parameter - callback($pipes).
+
+Returns:  A standard array of information.
+
+This static function determines how many pipes in the array need to be filled in (they contain a boolean of false) and then waits for that many TCP/IP connections with a valid pipe number and security tokens to connect in.
+
 ProcessHelper::StartProcess($cmd, $options = array())
 -----------------------------------------------------
 
@@ -141,7 +169,7 @@ The $options array accepts these options:
 * stdin - A boolean, a string, a resource, or an array (Default is true).
 * stdout - A boolean, a string, a resource, or an array (Default is true).
 * stderr - A boolean, a string, a resource, or an array (Default is true).
-* tcpstdin - A boolean that indicates whether or not to use TCP/IP for stdin (Default is true).  Windows only.
+* tcpstdin - A boolean that indicates whether or not to use TCP/IP for stdin (Default is false).  Windows only.
 * tcpstdout - A boolean that indicates whether or not to use TCP/IP for stdout (Default is true).  Windows only.
 * tcpstderr - A boolean that indicates whether or not to use TCP/IP for stderr (Default is true).  Windows only.
 * createprocess_exe - A string containing the path and filename to 'createprocess.exe' or 'createprocess-win.exe' (or equivalent software).
@@ -155,11 +183,11 @@ For the stdin, stdout, and stderr options:
 
 * true - A pipe will be returned.
 * false - Input/output redirected from/to 'NUL' (Windows) or '/dev/null' (other OSes).
-* A string - Contains the name of the file to read from/write to.  Will be relative to the starting directory so a full path and filename should ideally be used here.
+* A string - Contains the name of the file to read from/write to.  Will be relative to the starting directory so a full path and filename should ideally be used here.  If an empty string is passed, the default (probably the terminal or console) will be used and no pipe will be returned.
 * A resource - A compatible resource.
 * An array - A valid `proc_open()` pipe array.
 
-Note that processes on Windows are not necessarily expecting TCP/IP socket handles to be used in place of pipes (e.g. PHP).  As a result, as soon as zero bytes of data is read from 'stdin' during the next read in PHP userland, the underlying code will decide that it means End-Of-File (EOF) instead of temporarily reaching the end of the stream and will close the handle.  Using false for 'tcpstdin' will correct the problem but run the risk of blocking on writing to stdin.
+Note that processes on Windows are not necessarily expecting TCP/IP socket handles to be used in place of pipes (e.g. PHP).  As a result, as soon as zero bytes of data is read from 'stdin' during the next read in PHP userland, the underlying code will decide that it means End-Of-File (EOF) instead of temporarily reaching the end of the stream and will close the handle.  Using false for 'tcpstdin' corrects the problem but runs the risk of blocking on writing to stdin.
 
 Example usage:
 
@@ -171,7 +199,6 @@ Example usage:
 	$env["PASSWORD"] = "supersecret!";
 
 	$options = array(
-		"tcpstdin" => false,
 		"env" => $env
 	);
 
@@ -262,6 +289,22 @@ Example usage:
 	echo "Done.\n";
 ?>
 ```
+
+ProcessHelper::Wait($proc, &$pipes, $stdindata = "", $timeout = -1)
+-------------------------------------------------------------------
+
+Access:  public static
+
+Parmeters:
+
+* $proc - A resource to a process handle or a boolean of false.
+* $pipes - An array of standard pipes (0 = stdin, 1 = stdout, 2 = stderr) associated with the process.
+* $stdindata - A string containing the entire string to pass to the stdin pipe (Default is "").
+* $timeout - An integer containing the amount of time to run the function for, -1 is infinite (Default is -1).
+
+Returns:  A standard array of information.
+
+This static function passes `stdin` data and waits for the process to complete.  It gathers all `stdout` and `stderr` content and returns it all at once.  This may not be desirable for large amounts of output as it can use up RAM but can be useful for smaller amounts of output.
 
 ProcessHelper::TerminateProcess($id, $children = true, $force = true)
 ---------------------------------------------------------------------
