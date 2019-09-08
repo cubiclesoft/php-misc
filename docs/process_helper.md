@@ -31,6 +31,19 @@ var_dump($ps);
 ?>
 ```
 
+ProcessHelper::NormalizeCommand($cmd)
+-------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $cmd - A string containing a command to eventually execute.
+
+Returns:  The string with the executable portion of the command replaced with a full path and filename properly escaped.
+
+This static function extracts the executable portion of a command, locates the executable on the system, and replaces the command with a shell-escaped variant.  Useful for taking an input string such as "git push origin master" and transforming it into "C:\\path\\to\\git.exe push origin master" on Windows and "/usr/bin/git push origin master" on *NIX.
+
 ProcessHelper::GetUserInfoByID($uid)
 ------------------------------------
 
@@ -109,6 +122,20 @@ Returns:  A string containing the username on success, an empty string otherwise
 
 This static function calls `GetGroupInfoByID()`.
 
+ProcessHelper::MakeTempDir($prefix, $perms = 0770)
+--------------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $prefix - A string containing a prefix for the temporary directory.
+* $perms - An integer, usually octal format, containing the permissions to set the created directory to (Default is 0770).
+
+Returns:  A string containing the newly created directory in the temporary path.
+
+This static function creates and returns a temporary directory with specified access permissions based on the prefix, current process ID, and timestamp.
+
 ProcessHelper::GetCleanEnvironment()
 ------------------------------------
 
@@ -119,6 +146,22 @@ Parameters:  None.
 Returns:  An array of environment key-value pairs.
 
 This static function retrieves the current running script environment but removes specific entries that PHP CLI adds on startup.  Useful for constructing an environment for `StartProcess()`.
+
+ProcessHelper::ConnectTCPPipe($host, $port, $pipenum, $token)
+-------------------------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $host - A string containing a host to connect to.
+* $port - An integer containing the port to connect to.
+* $pipenum - An integer containing the pipe number the socket will map to.
+* $token - A string containing a security token used by `GetTCPPipes()`.
+
+Returns:  A standard array of information.
+
+This static function connects to a server started by `StartTCPServer()` and is listening via `GetTCPPipes()`.  Rarely used.
 
 ProcessHelper::StartTCPServer()
 -------------------------------
@@ -160,7 +203,7 @@ Parameters:
 
 Returns:  A standard array of information.
 
-This static function starts a process with non-blocking stdin, stdout, and stderr.  Depending on input options, Windows will generally require 'createprocess.exe' or 'createprocess-win.exe' from [CubicleSoft CreateProcess()](https://github.com/cubiclesoft/createprocess-windows) to be placed into the same directory as this class.
+This static function starts a process with non-blocking stdin, stdout, and stderr.  Depending on input options, Windows will generally require 'createprocess.exe' or 'createprocess-win.exe' from [CubicleSoft CreateProcess()](https://github.com/cubiclesoft/createprocess-windows/) to be placed into the same directory as this class.
 
 The input command and arguments must be properly escaped with `escapeshellarg()` to avoid the unfortunate situation of letting user input run whatever commands the user might want to run on the system.
 
@@ -169,7 +212,7 @@ The $options array accepts these options:
 * stdin - A boolean, a string, a resource, or an array (Default is true).
 * stdout - A boolean, a string, a resource, or an array (Default is true).
 * stderr - A boolean, a string, a resource, or an array (Default is true).
-* tcpstdin - A boolean that indicates whether or not to use TCP/IP for stdin (Default is false).  Windows only.
+* tcpstdin - A boolean that indicates whether or not to use TCP/IP for stdin (Default is true).  Windows only.
 * tcpstdout - A boolean that indicates whether or not to use TCP/IP for stdout (Default is true).  Windows only.
 * tcpstderr - A boolean that indicates whether or not to use TCP/IP for stderr (Default is true).  Windows only.
 * createprocess_exe - A string containing the path and filename to 'createprocess.exe' or 'createprocess-win.exe' (or equivalent software).
@@ -186,8 +229,6 @@ For the stdin, stdout, and stderr options:
 * A string - Contains the name of the file to read from/write to.  Will be relative to the starting directory so a full path and filename should ideally be used here.  If an empty string is passed, the default (probably the terminal or console) will be used and no pipe will be returned.
 * A resource - A compatible resource.
 * An array - A valid `proc_open()` pipe array.
-
-Note that processes on Windows are not necessarily expecting TCP/IP socket handles to be used in place of pipes (e.g. PHP).  As a result, as soon as zero bytes of data is read from 'stdin' during the next read in PHP userland, the underlying code will decide that it means End-Of-File (EOF) instead of temporarily reaching the end of the stream and will close the handle.  Using false for 'tcpstdin' corrects the problem but runs the risk of blocking on writing to stdin.
 
 Example usage:
 
@@ -290,8 +331,8 @@ Example usage:
 ?>
 ```
 
-ProcessHelper::Wait($proc, &$pipes, $stdindata = "", $timeout = -1)
--------------------------------------------------------------------
+ProcessHelper::Wait($proc, &$pipes, $stdindata = "", $timeout = -1, $outputcallback = false)
+--------------------------------------------------------------------------------------------
 
 Access:  public static
 
@@ -301,10 +342,13 @@ Parmeters:
 * $pipes - An array of standard pipes (0 = stdin, 1 = stdout, 2 = stderr) associated with the process.
 * $stdindata - A string containing the entire string to pass to the stdin pipe (Default is "").
 * $timeout - An integer containing the amount of time to run the function for, -1 is infinite (Default is -1).
+* $outputcallback - A valid callback function for handling output (Default is false).  The callback function must accept two parameters - callback($data, $pipenum).
 
 Returns:  A standard array of information.
 
 This static function passes `stdin` data and waits for the process to complete.  It gathers all `stdout` and `stderr` content and returns it all at once.  This may not be desirable for large amounts of output as it can use up RAM but can be useful for smaller amounts of output.
+
+The optional output callback can be used to echo stdout/stderr data as it arrives.  If stderr data exists, it is only passed to the callback after a newline on stdout and only if stderr has a newline.  This guarantees that stderr data won't show up in the middle of a line of output when echo'ed.
 
 ProcessHelper::TerminateProcess($id, $children = true, $force = true)
 ---------------------------------------------------------------------
