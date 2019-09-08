@@ -77,6 +77,7 @@ Example usage:
 		exit();
 	}
 
+	$origargs = $args;
 	$suppressoutput = (isset($args["opts"]["suppressoutput"]) && $args["opts"]["suppressoutput"]);
 
 	// Get the command.
@@ -88,38 +89,24 @@ Example usage:
 
 	$cmd = CLI::GetLimitedUserInputWithArgs($args, false, "Command", false, "Available commands:", $cmds, true, $suppressoutput);
 
-	function DisplayResult($result)
-	{
-		echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n";
-
-		exit();
-	}
-
 	if ($cmd === "list")
 	{
 		// ...
 	}
 	else if ($cmd === "create")
 	{
-		// Process the parameters.
-		$options = array(
-			"shortmap" => array(
-				"?" => "help"
-			),
-			"rules" => array(
-				"domain" => array("arg" => true, "multiple" => true),
-				"ipaddr" => array("arg" => true, "multiple" => true),
-				"help" => array("arg" => false)
-			)
-		);
-		$args = CLI::ParseCommandLine($options, array_merge(array(""), $args["params"]));
-
-		if (isset($args["opts"]["help"]))  DisplayResult(array("success" => true, "options" => array_keys($options["rules"])));
+		CLI::ReinitArgs($args, array("domain", "ipaddr"));
 
 		$domain = GetDomainName();
 		$ipaddr = CLI::GetUserInputWithArgs($args, "ipaddr", "Your IP address", false, "To quickly find out what your IP address is, go to:  https://www.google.com/search?q=what's+my+ip");
 
 		// ...
+
+		$result = array(
+			"success" => true
+		);
+
+		CLI::DisplayResult($result);
 	}
 	else if ($cmd === "delete")
 	{
@@ -296,6 +283,34 @@ Example usage:
 	echo CLI::GetHexDump("Just a quick test.\n");
 ?>
 ```
+
+CLI::DisplayResult($result, $exit = true)
+-----------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $result - An array of information to output as JSON or a string to echo.
+* $exit - A boolean that indicates whether or not to immediately exit the running script (Default is true).
+
+Returns:  Nothing.
+
+This static function outputs a result and exits the process by default.  Useful for question-answer interfaces that output JSON.
+
+CLI::ReinitArgs(&$args, $newargs)
+---------------------------------
+
+Access:  public function
+
+Parameters:
+
+* $args - An array of values that represent valid option keys.
+* $newargs - An array of values that represent valid option keys.
+
+Returns:  Nothing.
+
+This static function reparses the argument parameters as options based on the new arguments.  Useful for splitting a question-answer interface into subtrees of options.
 
 CLI::LogMessage($msg, $data = null)
 -----------------------------------
