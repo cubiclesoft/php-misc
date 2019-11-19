@@ -46,6 +46,7 @@ Example usage:
 	require_once "support/apple_icns.php";
 
 	$data = file_get_contents("installer_icon.png");
+
 	$result = AppleICNS::Create($data);
 	if (!$result["success"])
 	{
@@ -93,6 +94,7 @@ Example usage:
 	require_once "support/apple_icns.php";
 
 	$data = file_get_contents("installer_icon.icns");
+
 	$result = AppleICNS::Parse($data);
 	if (!$result["success"])
 	{
@@ -130,6 +132,7 @@ Example usage:
 	require_once "support/apple_icns.php";
 
 	$data = file_get_contents("installer_icon.icns");
+
 	$result = AppleICNS::Parse($data);
 	if (!$result["success"])
 	{
