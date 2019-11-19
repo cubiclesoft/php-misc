@@ -79,6 +79,19 @@ Returns:  A string containing the UTF-8 encoded version of the code point.
 
 This static function accepts a valid 32-bit Unicode code point numeric value and returns a UTF-8 string.  If the code point is not valid (e.g. a surrogate), an empty string is returned.
 
+UTF8::IsCombiningCodePoint($val)
+--------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $val - An integer containing a code point.
+
+Returns:  A boolean of true if the code point is a combining code point, false otherwise.
+
+This static function returns whether or not a code point is a combining code point.  Combining code points allow for combining diacritics with other code points to form a single character.
+
 UTF8::IsASCII($data)
 --------------------
 
