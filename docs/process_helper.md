@@ -350,6 +350,21 @@ This static function passes `stdin` data and waits for the process to complete. 
 
 The optional output callback can be used to echo stdout/stderr data as it arrives.  If stderr data exists, it is only passed to the callback after a newline on stdout and only if stderr has a newline.  This guarantees that stderr data won't show up in the middle of a line of output when echo'ed.
 
+ProcessHelper::FindProcessIDsByFilename($filename)
+--------------------------------------------------
+
+Access:  public static
+
+Parmeters:
+
+* $filename - A string containing a filename to find in the running process list.
+
+Returns:  A standard array of information.
+
+This static function finds running processes by executable name OR full path and filename and returns the process IDs.  The function only returns a failure condition if it can't find a suitable application or function on the system to retrieve running processes.  Note that this approach has known issues in that between this function and calling another function such as `TerminateProcess()`, the process could exit and another process start with the same process ID.
+
+This function only returns process IDs that the user has access to terminate.
+
 ProcessHelper::TerminateProcess($id, $children = true, $force = true)
 ---------------------------------------------------------------------
 
