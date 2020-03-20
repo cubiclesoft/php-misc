@@ -6,6 +6,7 @@ This class implements a generic TCP/IP server.
 For example usage, see:
 
 https://github.com/cubiclesoft/net-test
+https://github.com/cubiclesoft/php-license-server
 
 GenericServer::Reset()
 ----------------------
@@ -124,7 +125,7 @@ Parameters:  None.
 
 Returns:  Nothing.
 
-This function stops the web server and cleans up after itself.  Automatically called by the destructor.
+This function stops the server and cleans up after itself.  Automatically called by the destructor.
 
 GenericServer::GetStream()
 --------------------------
@@ -217,6 +218,19 @@ Example usage:
 ?>
 ```
 
+GenericServer::ProcessWaitResult(&$result)
+------------------------------------------
+
+Access:  protected
+
+Parameters:
+
+* $result - An array of standard information containing file handles.
+
+Returns:  Nothing.
+
+This function processes the result of the Wait() function.  Derived classes may call this function (e.g. LibEvGenericServer).
+
 GenericServer::GetClients()
 ---------------------------
 
@@ -227,6 +241,30 @@ Parameters:  None.
 Returns:  The internal array of active clients.
 
 This function retrieves the internal array of active clients.  These are the clients that have made it past the initialization states.
+
+GenericServer::NumClients()
+---------------------------
+
+Access:  public
+
+Parameters:  None.
+
+Returns:  The number of active clients.
+
+This function returns the number clients currently connected to the server.  It's more efficient to call this function than to get a copy of the clients array just to `count()` them.
+
+GenericServer::UpdateClientState($id)
+-------------------------------------
+
+Access:  public
+
+Parameters:
+
+* $id - An integer containing the ID of the client to update the internal state for.
+
+Returns:  Nothing.
+
+This function does nothing by default.  Derived classes may maintain internal technical state for optimized performance later on (e.g. LibEvGenericServer updates read/write notification state for the socket descriptor for use with a later Wait() call).  It is recommended that this function be called after appending data to $client->writedata.
 
 GenericServer::GetClient($id)
 -----------------------------
@@ -241,6 +279,19 @@ Returns:  The associated client instance on success, a boolean of false otherwis
 
 This function retrieves a specific active client.  An active client is one that has made it past the initialization states.
 
+GenericServer::DetachClient($id)
+--------------------------------
+
+Access:  _internal_
+
+Parameters:
+
+* $id - An integer containing a client ID.
+
+Returns:  The associated client instance on success, a boolean of false otherwise.
+
+This function detaches a specific active client.  Note that there is no AttachClient() function for GenericServer.  This function may be used by other classes to handle 'Upgrade' style requests to other protocols.
+
 GenericServer::RemoveClient($id)
 --------------------------------
 
@@ -254,12 +305,14 @@ Returns:  Nothing.
 
 This function disconnects and removes a specific active client.
 
-GenericServer::InitNewClient()
-------------------------------
+GenericServer::InitNewClient($fp)
+---------------------------------
 
 Access:  _internal_
 
-Parameters:  None.
+Parameters:
+
+* $fp - A stream resource or a boolean of false.
 
 Returns:  A new stdClass instance.
 
@@ -286,19 +339,6 @@ Parameters:
 Returns:  Nothing.
 
 This protected function handles new incoming connections in Wait().  Can be overridden in a derived class to provide alternate functionality.
-
-GenericServer::DetachClient($id)
---------------------------------
-
-Access:  _internal_
-
-Parameters:
-
-* $id - An integer containing a client ID.
-
-Returns:  The associated client instance on success, a boolean of false otherwise.
-
-This function detaches a specific active client.  Note that there is no AttachClient() function for GenericServer.  This function may be used by other classes to handle 'Upgrade' style requests to other protocols.
 
 GenericServer::StreamTimedOut($fp)
 ----------------------------------
