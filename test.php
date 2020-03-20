@@ -13,11 +13,15 @@
 	$rootpath = str_replace("\\", "/", dirname(__FILE__));
 
 	require_once $rootpath . "/support/cli.php";
+	require_once $rootpath . "/support/array_utils.php";
 	require_once $rootpath . "/support/calendar_event.php";
 	require_once $rootpath . "/support/event_manager.php";
 	require_once $rootpath . "/support/ipaddr.php";
-	require_once $rootpath . "/support/str_basics.php";
 	require_once $rootpath . "/support/utf8.php";
+	require_once $rootpath . "/support/utf_utils.php";
+	require_once $rootpath . "/support/serial_number.php";
+	require_once $rootpath . "/support/php_minifier.php";
+	require_once $rootpath . "/support/str_basics.php";
 
 	// Process the command-line options.
 	$options = array(
@@ -86,6 +90,23 @@
 
 	echo "Hex dump test\n";
 	echo CLI::GetHexDump("Just a quick test.\n");
+	echo "\n\n";
+
+	echo "ArrayUtils test\n";
+	$data = array(
+		"test_1" => null,
+		"test_2" => "Neat",
+		5 => "Don't reset me bro!",
+		"test_3" => "Cool",
+	);
+
+	var_dump(ArrayUtils::InsertAfterKey($data, "test_1", array(4 => "I should be between test_1 and test_2!", "me_too" => "Me too!")));
+	var_dump(ArrayUtils::InsertAfterKey($data, null, array("frist" => "Firrst!")));
+	var_dump(ArrayUtils::InsertAfterKey($data, "test_1", array("test_3" => $data["test_3"])));
+
+	var_dump(ArrayUtils::InsertBeforeKey($data, "test_2", array(4 => "I should be between test_1 and test_2!", "me_too" => "Me too!")));
+	var_dump(ArrayUtils::InsertBeforeKey($data, null, array("last" => "Laast!")));
+	var_dump(ArrayUtils::InsertBeforeKey($data, "test_2", array("test_3" => $data["test_3"])));
 	echo "\n\n";
 
 	echo "CalendarEvent test\n";
@@ -189,7 +210,53 @@
 	var_dump(UTF8::ConvertToHTML($str));
 	echo "\n\n";
 
-	echo "Request class test is in 'test_request.php'.\n\n";
+	echo "UTFUtils test\n";
+	var_dump(UTFUtils::Convert(UTFUtils::Convert($str, UTFUtils::UTF8, UTFUtils::UTF16_LE), UTFUtils::UTF16_LE, UTFUtils::UTF8));
+	echo "\n\n";
+
+	echo "Request class test is in 'test_request.php'.\n";
+	echo "\n\n";
+
+	echo "SerialNumber test\n";
+	$encryptsecret = "\x26\x2A\x58\xAD\x7C\xC3\x33\x06\x30\x20\xE6\xCE\x11\x18\x01\x1D\x67\x7F\x60\xCE";
+	$validatesecret = "\x54\x8E\x92\x07\x34\xCF\xAE\xF4\x70\x5B\x62\xB9\x89\x59\xFD\x62\xEE\x4E\xD1\x2E";
+
+	$options = array(
+		"expires" => true,
+		"date" => mktime(0, 0, 0, date("n"), date("j") + 31),
+		"product_class" => 0,
+		"major_ver" => 1,
+		"minor_ver" => 0,
+		"custom_bits" => 0,
+		"encrypt_secret" => $encryptsecret,
+		"validate_secret" => $validatesecret
+	);
+
+	for ($x = 0; $x < 10; $x++)
+	{
+		$result = SerialNumber::Generate(1, 1, "test" . $x . "@cubiclesoft.com", $options);
+		if (!$result["success"])
+		{
+			var_dump($result);
+
+			exit();
+		}
+		echo ($x + 1) . ":  " . $result["serial"] . "\n";
+
+		$result = SerialNumber::Verify($result["serial"], 1, 1, "test" . $x . "@cubiclesoft.com", $options);
+		if (!$result["success"])
+		{
+			var_dump($result);
+
+			exit();
+		}
+	}
+	echo "\n\n";
+
+	echo "PHPMinifier test\n";
+	$result = PHPMinifier::Minify("test_request.php", file_get_contents("test_request.php"));
+	echo $result["data"] . "\n";
+	echo "\n\n";
 
 	echo "Str test\n";
 	$filename = __FILE__;
