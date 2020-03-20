@@ -1,6 +1,6 @@
 <?php
 	// FastCGI client class.
-	// (C) 2018 CubicleSoft.  All Rights Reserved.
+	// (C) 2020 CubicleSoft.  All Rights Reserved.
 
 	class FastCGI
 	{
@@ -799,23 +799,23 @@
 			$y = strlen($data);
 			while ($x < $y)
 			{
-				$namelen = ord($data{$x});
+				$namelen = ord($data[$x]);
 				if ($namelen < 128)  $x++;
 				else if ($x + 4 > $y)  break;
 				else
 				{
-					$data{$x} = chr($namelen & 0x7F);
-					$namelen = unpack("N", substr($data{$x}, $x, 4))[1];
+					$data[$x] = chr($namelen & 0x7F);
+					$namelen = unpack("N", substr($data[$x], $x, 4))[1];
 					$x += 4;
 				}
 
-				$vallen = ord($data{$x});
+				$vallen = ord($data[$x]);
 				if ($vallen < 128)  $x++;
 				else if ($x + 4 > $y)  break;
 				else
 				{
-					$data{$x} = chr($vallen & 0x7F);
-					$vallen = unpack("N", substr($data{$x}, $x, 4))[1];
+					$data[$x] = chr($vallen & 0x7F);
+					$vallen = unpack("N", substr($data[$x], $x, 4))[1];
 					$x += 4;
 				}
 
