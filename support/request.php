@@ -1,6 +1,6 @@
 <?php
 	// CubicleSoft web request helper/processing functions.
-	// (C) 2018 CubicleSoft.  All Rights Reserved.
+	// (C) 2020 CubicleSoft.  All Rights Reserved.
 
 	class Request
 	{

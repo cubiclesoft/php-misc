@@ -1,6 +1,6 @@
 <?php
 	// XTerm ANSI escape code emitter.
-	// (C) 2019 CubicleSoft.  All Rights Reserved.
+	// (C) 2020 CubicleSoft.  All Rights Reserved.
 
 	// Sources:
 	//   https://invisible-island.net/xterm/ctlseqs/ctlseqs.html

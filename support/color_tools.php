@@ -1,6 +1,6 @@
 <?php
 	// Color space tools.
-	// (C) 2019 CubicleSoft.  All Rights Reserved.
+	// (C) 2020 CubicleSoft.  All Rights Reserved.
 
 	class ColorTools
 	{
