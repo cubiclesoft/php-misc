@@ -122,7 +122,7 @@
 			if (strpos($url, ":") !== false)  return $url;
 
 			// Handle relative paths.
-			if ($url === "" || $url{0} !== "/")  return rtrim(self::GetFullURLBase($protocol), "/") . "/" . $url;
+			if ($url === "" || $url[0] !== "/")  return rtrim(self::GetFullURLBase($protocol), "/") . "/" . $url;
 
 			// Handle absolute paths.
 			$host = self::GetHost($protocol);
