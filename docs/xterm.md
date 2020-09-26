@@ -676,7 +676,7 @@ Access:  public static
 
 Parameters:
 
-* $type - A string containing one of 'block', 'underline', or 'bar'.  The 'bar' type is XTerm only.
+* $type - A string containing one of "block", "underline", or "bar".  The "bar" type is XTerm only.
 * $blink - A boolean indicating whether or not the cursor should blink.
 
 Returns:  Nothing.
@@ -1007,7 +1007,7 @@ Access:  public static
 
 Parameters:
 
-* $mode - A string containing one of 'interactive', 'interactive_echo', 'readline', 'readline_secure', or 'none'.
+* $mode - A string containing one of "interactive", "interactive_echo", "readline", "readline_secure", or "none".
 
 Returns:  Nothing.
 
