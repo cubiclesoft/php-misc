@@ -21,6 +21,7 @@
 	require_once $rootpath . "/support/utf_utils.php";
 	require_once $rootpath . "/support/serial_number.php";
 	require_once $rootpath . "/support/php_minifier.php";
+	require_once $rootpath . "/support/natural_language.php";
 	require_once $rootpath . "/support/str_basics.php";
 
 	// Process the command-line options.
@@ -256,6 +257,131 @@
 	echo "PHPMinifier test\n";
 	$result = PHPMinifier::Minify("test_request.php", file_get_contents("test_request.php"));
 	echo $result["data"] . "\n";
+	echo "\n\n";
+
+	echo "NaturalLanguage test\n";
+	$cond = "[[test var]]*2<16&&(x+2*3<14&&cool_beans=='Cool beans!')";
+	echo $cond . "\n";
+
+	$result = NaturalLanguage::ParseConditional($cond);
+	if (!$result["success"])
+	{
+		var_dump($result);
+
+		exit();
+	}
+
+	echo NaturalLanguage::MakeConditional($result["tokens"]) . "\n";
+
+	$data = array(
+		"test var" => 7,
+		"x" => "7",
+		"cool_beans" => "Cool beans!",
+		"first_name" => "John",
+		"last_name" => "Smith",
+		"last_profile_date" => "2019-03-18"
+	);
+
+	$data["last_profile_days"] = (new DateTime())->diff(new DateTime($data["last_profile_date"]))->days;
+
+	$result2 = NaturalLanguage::RunConditionalCheck($result["tokens"], $data);
+	if (!$result2["success"])
+	{
+		var_dump($result2);
+
+		exit();
+	}
+
+	$rules = array(
+		"" => array(
+			"type" => "if",
+			"matches" => 1,
+			"rules" => array(
+				array(
+					"cond" => $cond,
+					"output" => array(
+						"Hello ", "@greeting_name", " ", "[[last_name]]", "!  ", "@special_message_intro", "\n\n",
+						"@special_message", "\n\n",
+						"You last updated your profile on ", "@profile_date", ".", "@old_profile_check"
+					)
+				),
+				array("output" => array("Hello.  There is no special message available."))
+			)
+		),
+		"greeting_name" => array(
+			"type" => "data",
+			"key" => "first_name",
+			"case" => "upper"
+		),
+		"special_message_intro" => array(
+			"type" => "if",
+			"randomize" => true,
+			"matches" => 1,
+			"rules" => array(
+				array("output" => "Your special message is:"),
+				array("output" => "Your special message today:"),
+				array("output" => "The super secret message is:"),
+			)
+		),
+		"special_message" => array(
+			"type" => "data",
+			"key" => "cool_beans",
+			"case" => "first"
+		),
+		"profile_date" => array(
+			"type" => "data",
+			"key" => "last_profile_date",
+			"format" => "date",
+			"date" => "D, M j, Y"
+		),
+		"old_profile_check" => array(
+			"type" => "if",
+			"matches" => 1,
+			"rules" => array(
+				array(
+					"cond" => "last_profile_days > 365",
+					"output" => array("  ", "@old_profile")
+				),
+				array(
+					"cond" => "last_profile_days > 365 * 2",
+					"output" => array("  ", "@very_old_profile")
+				),
+			)
+		),
+		"old_profile" => array(
+			"type" => "if",
+			"randomize" => true,
+			"matches" => 1,
+			"rules" => array(
+				array("output" => "Your profile hasn't been updated in a while."),
+				array("output" => "You might consider updating your profile for best results."),
+				array("output" => "Updating your profile every so often is a good idea."),
+			)
+		),
+		"very_old_profile" => array(
+			"type" => "if",
+			"randomize" => true,
+			"matches" => 1,
+			"rules" => array(
+				array("output" => "Hey, we've noticed you haven't updated your profile for a very long time."),
+				array("output" => "It's at least a good idea to change your password on your account."),
+				array("output" => "Really old accounts are more easily hacked.  Updating your account password is recommended."),
+			)
+		),
+	);
+
+	$result2 = NaturalLanguage::Generate($data, $rules);
+	if (!$result2["success"])
+	{
+		var_dump($result2);
+
+		exit();
+	}
+
+	echo $result2["value"] . "\n\n";
+	echo "Unique states:  " . NaturalLanguage::CalculateUniqueStates($rules) . "\n";
+	echo "Used data:  " . implode(", ", array_keys($result2["used_data"])) . "\n";
+	echo "Used rules:  " . implode(", ", array_keys($result2["used_rules"])) . "\n";
 	echo "\n\n";
 
 	echo "Str test\n";
