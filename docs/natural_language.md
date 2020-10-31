@@ -95,7 +95,26 @@ Example usage:
 				array("output" => "Really old accounts are more easily hacked.  Updating your account password is recommended."),
 			)
 		),
+		"orphaned_rule" => array(
+			"type" => "if",
+			"randomize" => true,
+			"matches" => 1,
+			"rules" => array(
+				array("output" => "I'm unreferenced by all the other rules."),
+				array("output" => "No, really.  I'm not gonna show up."),
+			)
+		),
 	);
+
+	$result2 = NaturalLanguage::ValidateRules($data, $rules);
+	if (!$result2["success"])
+	{
+		var_dump($result2);
+
+		exit();
+	}
+
+	echo $result2["value"] . "\n\n";
 
 	$result2 = NaturalLanguage::Generate($data, $rules);
 	if (!$result2["success"])
@@ -146,7 +165,7 @@ Returns:  An array containing standard information.
 
 This static function processes the input data and rules arrays to generate content based on the rules and data.  Note that this function does not sanitize inputs.  It is recommended that input data be sanitized prior to calling this function.
 
-The rules array consists of named key-value pairs.  Each rule can be one of two types:  "data" and "if".
+The $rules array consists of named key-value pairs.  Each rule can be one of two types:  "data" and "if".
 
 The "data" rule type has the following options:
 
@@ -176,7 +195,11 @@ Conditional statements for "if" rules can be simple or complex.  Example:
 
 The example above uses the input data values for "test var", "x", and "cool_beans" and then performs some math and comparisons to determine if the output should be included.  Note that, in general, complex values should be precalculated and passed in the data array as only simple and binary math are supported.  Features such as function calls and typecasting are not supported in conditional statements at this time.
 
-Top-level rules can only be run exactly one time per Generate() call.  This is done to prevent infinite loops from occurring.  Data keys can be referenced as many times as needed.
+The $options array accepts these options:
+
+* reuse_rules - An integer containing the maximum number of times a rule can be used (Default is 10).  This helps prevent infinite loops from occurring.
+* max_depth - An integer containing the maximum depth to traverse into the rules (Default is 100).  This helps prevent infinite loops from occurring.
+* max_process - An integer containing the maximum number of rules to process (Default is 1000).  This helps prevent infinite loops from occurring.
 
 NaturalLanguage::ProcessRule(&$data, &$rules, $rkey, &$options)
 ---------------------------------------------------------------
@@ -193,6 +216,39 @@ Parameters:
 Returns:  A standard array of information.
 
 This internal static function processes the input data and rules arrays to generate content based on the rules and data.  This function is the primary workhorse of the Generate() function.
+
+NaturalLanguage::ValidateRules($data, &$rules, $options = array())
+------------------------------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $data - An array containing string key-value pairs to be used with the rules.
+* $rules - An array containing a set of rules.
+* $options - An array containing options (Default is array()).
+
+Returns:  An array containing standard information.
+
+This static function validates the input data and rules arrays for common conditions.  Useful for identifying issues with rules to be passed to Generate() that might not regularly show up.  Also can be used to identify all possible references to data fields and rules for finding areas that could be optimized (e.g. unreferenced data and orphaned rules).
+
+This function is much more strict/pedantic than Generate() and will return errors for rules that will function just fine within Generate() but should probably fixed to avoid issues.
+
+NaturalLanguage::ValidateRule(&$data, &$rules, $rkey, &$options)
+----------------------------------------------------------------
+
+Access:  protected static
+
+Parameters:
+
+* $data - An array containing string key-value pairs to be used with the rules.
+* $rules - An array containing a set of rules.
+* $rkey - A string containing the top-level key to use.
+* $options - An array containing options.
+
+Returns:  A standard array of information.
+
+This internal static function validates the input data and specified rule.  This function is the primary workhorse of the ValidateRules() function.
 
 NaturalLanguage::MakeConditional($tokens)
 -----------------------------------------

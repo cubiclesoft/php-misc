@@ -368,7 +368,24 @@
 				array("output" => "Really old accounts are more easily hacked.  Updating your account password is recommended."),
 			)
 		),
+		"orphaned_rule" => array(
+			"type" => "if",
+			"randomize" => true,
+			"matches" => 1,
+			"rules" => array(
+				array("output" => "I'm unreferenced by all the other rules."),
+				array("output" => "No, really.  I'm not gonna show up."),
+			)
+		),
 	);
+
+	$result2 = NaturalLanguage::ValidateRules($data, $rules);
+	if (!$result2["success"])
+	{
+		var_dump($result2);
+
+		exit();
+	}
 
 	$result2 = NaturalLanguage::Generate($data, $rules);
 	if (!$result2["success"])
