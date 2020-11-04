@@ -339,12 +339,12 @@
 			"matches" => 1,
 			"rules" => array(
 				array(
-					"cond" => "last_profile_days > 365",
-					"output" => array("  ", "@old_profile")
+					"cond" => "last_profile_days > 365 * 2",
+					"output" => "  {{very_old_profile}}"
 				),
 				array(
-					"cond" => "last_profile_days > 365 * 2",
-					"output" => array("  ", "@very_old_profile")
+					"cond" => "last_profile_days > 365",
+					"output" => "  {{old_profile}}"
 				),
 			)
 		),

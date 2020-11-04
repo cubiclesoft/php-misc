@@ -66,12 +66,12 @@ Example usage:
 			"matches" => 1,
 			"rules" => array(
 				array(
-					"cond" => "last_profile_days > 365",
-					"output" => array("  ", "@old_profile")
+					"cond" => "last_profile_days > 365 * 2",
+					"output" => "  {{very_old_profile}}"
 				),
 				array(
-					"cond" => "last_profile_days > 365 * 2",
-					"output" => array("  ", "@very_old_profile")
+					"cond" => "last_profile_days > 365",
+					"output" => "  {{old_profile}}"
 				),
 			)
 		),
@@ -249,6 +249,19 @@ Parameters:
 Returns:  A standard array of information.
 
 This internal static function validates the input data and specified rule.  This function is the primary workhorse of the ValidateRules() function.
+
+NaturalLanguage::SplitOutput($str)
+----------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $str - A string containing output to split into an array.
+
+Returns:  An array containing the split string.
+
+This static function takes in an output string and splits it into an array containing strings, rule references, and data references.  For improved performance, rule outputs should be pre-split but is not required.
 
 NaturalLanguage::MakeConditional($tokens)
 -----------------------------------------
