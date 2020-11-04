@@ -343,6 +343,72 @@
 			}
 		}
 
+		public static function OptimizeRules($rules, $removeorphans = false)
+		{
+			if (!is_array($rules) || !isset($rules[""]))  return array("success" => false, "error" => self::NLBTranslate("Invalid rules specified.  Expected root rule."), "errorcode" => "invalid_rules");
+
+			$refrules = array("" => true);
+
+			foreach ($rules as $key => &$rule)
+			{
+				if ($rule["type"] === "data")
+				{
+					// Remove 'if' type fields.
+					unset($rule["randomize"]);
+					unset($rule["matches"]);
+					unset($rule["rules"]);
+				}
+				else if ($rule["type"] === "if")
+				{
+					// Remove 'data' type fields.
+					unset($rule["key"]);
+					unset($rule["format"]);
+					unset($rule["decimals"]);
+					unset($rule["decpoint"]);
+					unset($rule["separator"]);
+					unset($rule["date"]);
+					unset($rule["gmt"]);
+					unset($rule["case"]);
+					unset($rule["replace"]);
+
+					// Save some processing steps later.
+					foreach ($rule["rules"] as $num => &$rule2)
+					{
+						if (isset($rule2["output"]) && is_string($rule2["output"]))  $rule2["output"] = self::SplitOutput($rule2["output"]);
+
+						if ($removeorphans)
+						{
+							foreach ($rule2["output"] as $output)
+							{
+								if (substr($output, 0, 1) === "@")
+								{
+									$rkey2 = substr($output, 1);
+									if (!isset($rules[$rkey2]))  return array("success" => false, "error" => self::NLBTranslate("The rule '%s' does not exist.", $rkey2), "errorcode" => "invalid_rule_reference");
+									else  $refrules[$rkey2] = true;
+								}
+								else if (substr($output, 0, 2) === "{{" && substr($output, -2) === "}}")
+								{
+									$rkey2 = substr($output, 2, -2);
+									if (!isset($rules[$rkey2]))  return array("success" => false, "error" => self::NLBTranslate("The rule '%s' does not exist.", $rkey2), "errorcode" => "invalid_rule_reference");
+									else  $refrules[$rkey2] = true;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if ($removeorphans)
+			{
+				foreach ($rules as $key => &$rule)
+				{
+					if (!isset($refrules[$key]))  unset($rules[$key]);
+				}
+			}
+
+			return array("success" => true, "rules" => $rules);
+		}
+
 		public static function SplitOutput($str)
 		{
 			$result = array();

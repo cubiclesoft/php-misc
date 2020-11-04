@@ -232,7 +232,7 @@ Returns:  An array containing standard information.
 
 This static function validates the input data and rules arrays for common conditions.  Useful for identifying issues with rules to be passed to Generate() that might not regularly show up.  Also can be used to identify all possible references to data fields and rules for finding areas that could be optimized (e.g. unreferenced data and orphaned rules).
 
-This function is much more strict/pedantic than Generate() and will return errors for rules that will function just fine within Generate() but should probably fixed to avoid issues.
+This function is much more strict/pedantic than Generate() and will return errors for rules that will function just fine within Generate() but should probably be fixed to avoid issues.
 
 NaturalLanguage::ValidateRule(&$data, &$rules, $rkey, &$options)
 ----------------------------------------------------------------
@@ -249,6 +249,20 @@ Parameters:
 Returns:  A standard array of information.
 
 This internal static function validates the input data and specified rule.  This function is the primary workhorse of the ValidateRules() function.
+
+NaturalLanguage::OptimizeRules($rules, $removeorphans = false)
+--------------------------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $rules - An array containing a set of rules.
+* $removeorphans - A boolean that indicates whether or not to remove orphaned rules (Default is false).
+
+Returns:  A standard array of information.
+
+This static function optimizes the rules array by removing spurious type entries and splitting outputs for later Generate() calls.
 
 NaturalLanguage::SplitOutput($str)
 ----------------------------------

@@ -346,7 +346,11 @@
 					"cond" => "last_profile_days > 365",
 					"output" => "  {{old_profile}}"
 				),
-			)
+			),
+			// Only here to test to see if these get removed during optimization.
+			"key" => "last_profile_date",
+			"format" => "date",
+			"date" => "D, M j, Y"
 		),
 		"old_profile" => array(
 			"type" => "if",
@@ -381,6 +385,14 @@
 
 	$result2 = NaturalLanguage::ValidateRules($data, $rules);
 	if (!$result2["success"])
+	{
+		var_dump($result2);
+
+		exit();
+	}
+
+	$result2 = NaturalLanguage::OptimizeRules($rules, true);
+	if (!$result2["success"] || isset($result2["rules"]["orphaned_rule"]) || isset($result2["rules"]["old_profile_check"]["key"]) || count($result2["rules"]["old_profile_check"]["rules"][0]["output"]) != 2)
 	{
 		var_dump($result2);
 
