@@ -167,6 +167,9 @@
 									$dkey = substr($output, 2, -2);
 									if (!isset($data[$dkey]))  return array("success" => false, "error" => self::NLBTranslate("The expected data field '%s' does not exist as specified by rule '%s' in the 'output' for subrule %u.", $dkey, $rkey, $num + 1), "errorcode" => "missing_data_field");
 
+									if (!isset($options["used_data"][$dkey]))  $options["used_data"][$dkey] = 0;
+									$options["used_data"][$dkey]++;
+
 									$val .= $data[$dkey];
 								}
 								else
@@ -330,6 +333,11 @@
 							{
 								$dkey = substr($output, 2, -2);
 								if (!isset($data[$dkey]))  return array("success" => false, "error" => self::NLBTranslate("The expected data field '%s' does not exist as specified by rule '%s' in the 'output' for subrule %u.", $dkey, $rkey, $num + 1), "errorcode" => "missing_data_field");
+								else
+								{
+									if (!isset($options["ref_data"][$dkey]))  $options["ref_data"][$dkey] = 0;
+									$options["ref_data"][$dkey]++;
+								}
 							}
 						}
 					}
@@ -730,8 +738,8 @@
 					if ($opstack[$x] !== "<<" && $opstack[$x] !== ">>")  $x++;
 					else
 					{
-						if ($opstack[$x] === "<<")  $valstack[$x] <<= $valstack[$x + 1];
-						else if ($opstack[$x] === ">>")  $valstack[$x] >>= $valstack[$x + 1];
+						if ($opstack[$x] === "<<")  $valstack[$x] <<= (int)$valstack[$x + 1];
+						else if ($opstack[$x] === ">>")  $valstack[$x] >>= (int)$valstack[$x + 1];
 
 						array_splice($valstack, $x + 1, 1);
 						array_splice($opstack, $x, 1);
@@ -755,10 +763,10 @@
 					if ($opstack[$x] !== "<" && $opstack[$x] !== "<=" && $opstack[$x] !== ">" && $opstack[$x] !== ">=")  $x++;
 					else
 					{
-						if ($opstack[$x] === "<")  $valstack[$x] = $valstack[$x] < $valstack[$x + 1];
-						else if ($opstack[$x] === "<=")  $valstack[$x] = $valstack[$x] <= $valstack[$x + 1];
-						else if ($opstack[$x] === ">")  $valstack[$x] = $valstack[$x] > $valstack[$x + 1];
-						else if ($opstack[$x] === ">=")  $valstack[$x] = $valstack[$x] >= $valstack[$x + 1];
+						if ($opstack[$x] === "<")  $valstack[$x] = (double)$valstack[$x] < (double)$valstack[$x + 1];
+						else if ($opstack[$x] === "<=")  $valstack[$x] = (double)$valstack[$x] <= (double)$valstack[$x + 1];
+						else if ($opstack[$x] === ">")  $valstack[$x] = (double)$valstack[$x] > (double)$valstack[$x + 1];
+						else if ($opstack[$x] === ">=")  $valstack[$x] = (double)$valstack[$x] >= (double)$valstack[$x + 1];
 
 						array_splice($valstack, $x + 1, 1);
 						array_splice($opstack, $x, 1);
@@ -802,7 +810,7 @@
 					if ($opstack[$x] !== "&")  $x++;
 					else
 					{
-						$valstack[$x] = $valstack[$x] & $valstack[$x + 1];
+						$valstack[$x] = (int)$valstack[$x] & (int)$valstack[$x + 1];
 
 						array_splice($valstack, $x + 1, 1);
 						array_splice($opstack, $x, 1);
@@ -823,7 +831,7 @@
 					if ($opstack[$x] !== "^")  $x++;
 					else
 					{
-						$valstack[$x] = $valstack[$x] ^ $valstack[$x + 1];
+						$valstack[$x] = (int)$valstack[$x] ^ (int)$valstack[$x + 1];
 
 						array_splice($valstack, $x + 1, 1);
 						array_splice($opstack, $x, 1);
@@ -844,7 +852,7 @@
 					if ($opstack[$x] !== "|")  $x++;
 					else
 					{
-						$valstack[$x] = $valstack[$x] | $valstack[$x + 1];
+						$valstack[$x] = (int)$valstack[$x] | (int)$valstack[$x + 1];
 
 						array_splice($valstack, $x + 1, 1);
 						array_splice($opstack, $x, 1);
