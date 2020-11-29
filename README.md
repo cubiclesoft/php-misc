@@ -3,7 +3,7 @@ Miscellaneous CubicleSoft PHP Classes
 
 Miscellaneous, lonely PHP classes that don't already have a home in a CubicleSoft library but want to be free and open source and loved.  MIT or LGPL, your choice.
 
-[![Donate](https://cubiclesoft.com/res/donate-shield.png)](https://cubiclesoft.com/donate/)
+[![Donate](https://cubiclesoft.com/res/donate-shield.png)](https://cubiclesoft.com/donate/) [![Discord](https://img.shields.io/discord/777282089980526602?label=chat&logo=discord)](https://cubiclesoft.com/product-support/github/)
 
 Classes
 -------
