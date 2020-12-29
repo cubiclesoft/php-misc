@@ -331,6 +331,19 @@ Example usage:
 ?>
 ```
 
+ProcessHelper::DisplayAllOutput($str)
+-------------------------------------
+
+Access:  _internal_ static
+
+Parmeters:
+
+* $str - A string to display.
+
+Returns:  Nothing.
+
+This internal static function is called when `$outputcallback` is true in Wait().
+
 ProcessHelper::Wait($proc, &$pipes, $stdindata = "", $timeout = -1, $outputcallback = false)
 --------------------------------------------------------------------------------------------
 
@@ -342,13 +355,15 @@ Parmeters:
 * $pipes - An array of standard pipes (0 = stdin, 1 = stdout, 2 = stderr) associated with the process.
 * $stdindata - A string containing the entire string to pass to the stdin pipe (Default is "").
 * $timeout - An integer containing the amount of time to run the function for, -1 is infinite (Default is -1).
-* $outputcallback - A valid callback function for handling output (Default is false).  The callback function must accept two parameters - callback($data, $pipenum).
+* $outputcallback - A boolean or a valid callback function for handling output (Default is false).  The callback function must accept two parameters - callback($data, $pipenum).
 
 Returns:  A standard array of information.
 
 This static function passes `stdin` data and waits for the process to complete.  It gathers all `stdout` and `stderr` content and returns it all at once.  This may not be desirable for large amounts of output as it can use up RAM but can be useful for smaller amounts of output.
 
 The optional output callback can be used to echo stdout/stderr data as it arrives.  If stderr data exists, it is only passed to the callback after a newline on stdout and only if stderr has a newline.  This guarantees that stderr data won't show up in the middle of a line of output when echo'ed.
+
+When `$outputcallback` is true, all data sent to stdout and stderr are output using PHP `echo`.
 
 ProcessHelper::FindProcessIDsByFilename($filename)
 --------------------------------------------------
