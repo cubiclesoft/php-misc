@@ -215,6 +215,23 @@
 	var_dump(UTFUtils::Convert(UTFUtils::Convert($str, UTFUtils::UTF8, UTFUtils::UTF16_LE), UTFUtils::UTF16_LE, UTFUtils::UTF8));
 	echo "\n\n";
 
+	echo "UTFUtils Punycode test\n";
+	$punycodetests = @json_decode(file_get_contents($rootpath . "/punycode_tests.json"), true);
+	foreach ($punycodetests as $test)
+	{
+		$str = UTFUtils::ConvertToPunycode($test[0]);
+		echo ($test[1] === $str ? "[PASSED]" : "[FAILED]") . " " . $test[0] . " => " . $str . "\n";
+	}
+	echo "\n";
+	foreach ($punycodetests as $test)
+	{
+		if (isset($test[2]))  continue;
+
+		$str = UTFUtils::ConvertFromPunycode($test[1]);
+		echo ($test[0] === $str ? "[PASSED]" : "[FAILED]") . " " . $test[1] . " => " . $str . "\n";
+	}
+	echo "\n\n";
+
 	echo "Request class test is in 'test_request.php'.\n";
 	echo "\n\n";
 
