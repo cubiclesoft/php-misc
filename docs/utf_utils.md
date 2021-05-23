@@ -1,7 +1,7 @@
 UTFUtils Class:  'support/utf_utils.php'
 ========================================
 
-The UTFUtils class implements common Unicode string transformations between UTF-8, UTF-16, and UTF-32 in pure PHP userland without dependencies on the intl, mbstring, or flaky iconv PHP extensions.
+The UTFUtils class implements common Unicode string transformations between UTF-8, UTF-16, and UTF-32 in pure PHP userland without dependencies on the intl, mbstring, or flaky iconv PHP extensions.  Also implements Punycode (RFC3492) conversions from/to UTF-8.
 
 UTFUtils::IsCombiningCodePoint($val)
 ------------------------------------
@@ -56,3 +56,44 @@ Example usage:
 	echo UTFUtils::Convert($str, UTFUtils::UTF16_LE, UTFUtils::UTF8);
 ?>
 ```
+
+UTFUtils::ConvertToPunycode($domain)
+------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $domain - A string containing a domain name to convert from UTF-8 to Punycode.
+
+Returns:  A string containing the Punycode encoded domain on success, false on failure.
+
+This static function converts a domain from UTF-8 to its RFC3492 Punycode equivalent.
+
+UTFUtils::ConvertFromPunycode($domain)
+--------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $domain - A string containing a domain name to convert from Punycode to UTF-8.
+
+Returns:  A string containing the UTF-8 decoded domain on success, false on failure.
+
+This static function converts a domain from its RFC3492 Punycode to its UTF-8 equivalent.
+
+UTFUtils::InternalPunycodeAdapt($delta, $numpoints, $first)
+-----------------------------------------------------------
+
+Access: protected static
+
+Parameters:
+
+* $delta - An integer containing a delta.
+* $numpoints - An integer containing the number of processed code points.
+* $first - A boolean indicating whether or not this is the first time the function is being called.
+
+Returns:  An integer containing an adaptation bias.
+
+This internal function implements a port of the RFC3492 Punycode adapt() function.
