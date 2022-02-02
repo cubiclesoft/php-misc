@@ -1,6 +1,6 @@
 <?php
 	// Directory helper functions.
-	// (C) 2018 CubicleSoft.  All Rights Reserved.
+	// (C) 2022 CubicleSoft.  All Rights Reserved.
 
 	class DirHelper
 	{
