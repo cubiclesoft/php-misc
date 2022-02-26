@@ -7,6 +7,7 @@ For example usage, see:
 
 https://github.com/cubiclesoft/net-test
 https://github.com/cubiclesoft/php-license-server
+https://github.com/cubiclesoft/xcron
 
 GenericServer::Reset()
 ----------------------
@@ -172,7 +173,7 @@ Access:  public
 
 Parameters:
 
-* $timeout - An integer reference containing the maximum number of seconds or a boolean of false.
+* $timeout - An integer containing the maximum number of seconds or a boolean of false.
 
 Returns:  A standard array of information.
 
