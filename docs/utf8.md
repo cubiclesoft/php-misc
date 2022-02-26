@@ -3,6 +3,23 @@ UTF8 Class:  'support/utf8.php'
 
 The UTF8 class aids in validation, cleanup, processing, and conversion of UTF-8 code points in PHP.
 
+UTF8::MakeValidStream(&$prefix, &$data, $open)
+----------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $prefix - A string to prepend from the previous call.
+* $data - A string to clean up.
+* $open - A boolean indicating whether or not this is the last call.
+
+Returns:  A valid UTF-8 string.
+
+This static function analyzes an input string for invalid UTF-8 code points, removes them, and returns the cleaned up string.  Most built-in PHP functions that handle Unicode will return an error or stop processing the moment an invalid byte is encountered.
+
+Supports partial data input as part of an ongoing stream.  $prefix stores the last partial code point at the end of the call ($data is unaffected).
+
 UTF8::MakeValid($data)
 ----------------------
 
@@ -16,7 +33,7 @@ Returns:  A valid UTF-8 string.
 
 This static function analyzes an input string for invalid UTF-8 code points, removes them, and returns the cleaned up string.  Most built-in PHP functions that handle Unicode will return an error or stop processing the moment an invalid byte is encountered.
 
-For performance reasons, use `UTF8::IsValid()` to test a string for validity before calling this function.
+For performance reasons and only if possible, use `UTF8::IsValid()` to test a string for validity before calling this function.
 
 Example usage:
 
