@@ -16,6 +16,32 @@ Returns:  Nothing.
 
 This static function dumps out the contents of each token as PHP sees the code onto its own line of output.  Only intended to be used with small subsets of data as the output can get unwieldy with even a few hundred tokens.
 
+PHPMinifier::GetClassAliasHandlerStart($prefix)
+-----------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $prefix - A string containing a prefix to use.
+
+Returns:  A string containing an empty namespace-wrapped PHP function declaration.
+
+This static function returns a custom `class_alias` handler that registers class aliases for later.  Useful for when an autoloader does things like declare class aliases.  Used by CubicleSoft PHP Decomposer.
+
+PHPMinifier::GetClassAliasHandlerEnd($prefix)
+---------------------------------------------
+
+Access:  public static
+
+Parameters:
+
+* $prefix - A string containing a prefix to use.
+
+Returns:  A string containing an empty namespace-wrapped PHP function declaration.
+
+This static function returns a custom `class_alias` handler and creates the registered class aliases from an earlier point.  Useful for when an autoloader does things like declare class aliases.  Used by CubicleSoft PHP Decomposer.
+
 PHPMinifier::Minify($filename, $data, $options = array())
 ---------------------------------------------------------
 
@@ -35,8 +61,10 @@ The $options array accepts these options:
 
 * require_namespace - A boolean that indicates whether or not the code must have a namespace and to fail if it doesn't have one (Default is false).
 * remove_comments - A boolean that indicates whether or not to remove comments from the code (Default is true).
+* remove_declare - A boolean that indicates whether or not to remove declare statements from the start of the code (Default is false).
 * convert_whitespace - A boolean that indicates whether or not to convert whitespace to tabs (Default is true).
 * check_dir_functions - A boolean that indicates whether or not to check the code for PHP directory scanning functions and return warnings (Default is false).  Used by CubicleSoft PHP Decomposer.
+* replace_class_alias - A string containing a prefix to use to replace `class_alias` with `PREFIX___class_alias` or a boolean of false (Default is false).  Used by CubicleSoft PHP Decomposer.
 * wrap_includes - A boolean that indicates whether or not to wrap includes (`require_once`, `require`, `include_once`, `include`) with a `file_exists` check (Default is false).  Used by CubicleSoft PHP Decomposer.
 * return_tokens - A boolean that indicates whether to return the final data as tokens or a string (Default is false).
 
