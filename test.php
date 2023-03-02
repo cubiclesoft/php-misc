@@ -20,6 +20,7 @@
 	require_once $rootpath . "/support/utf8.php";
 	require_once $rootpath . "/support/utf_utils.php";
 	require_once $rootpath . "/support/serial_number.php";
+	require_once $rootpath . "/support/system_profile.php";
 	require_once $rootpath . "/support/php_minifier.php";
 	require_once $rootpath . "/support/natural_language.php";
 	require_once $rootpath . "/support/str_basics.php";
@@ -268,6 +269,15 @@
 
 			exit();
 		}
+	}
+	echo "\n\n";
+
+	echo "SystemProfile test\n";
+	$result = SystemProfile::GetProfile();
+	foreach ($result as $key => $info)
+	{
+		if (is_string($info) || is_numeric($info))  echo $key . ":  " . $info . "\n";
+		else if (is_array($info))  echo $key . ":  " . $info["type"] . " (" . count($info["data"]) . " items)\n";
 	}
 	echo "\n\n";
 
